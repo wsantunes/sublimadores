@@ -1,0 +1,132 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Sublima",
+      "concept": "The Digital Atelier",
+      "description": "A precision-focused workspace for sublimation professionals. Minimalist, clean, and organized.",
+      "emotion": "Professional, Organized, Creative, Efficient"
+    },
+    "typography": {
+      "primary_font": "Space Grotesk",
+      "secondary_font": "Inter",
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold tracking-tight",
+        "body": "text-base leading-relaxed text-muted-foreground",
+        "small": "text-sm font-medium text-muted-foreground",
+        "label": "text-xs font-bold uppercase tracking-widest text-muted-foreground/70"
+      }
+    },
+    "colors": {
+      "theme_strategy": "Light Mode Preferred (Clean Canvas)",
+      "palette": {
+        "primary": "#00B4D8",
+        "primary_foreground": "#FFFFFF",
+        "secondary": "#0F172A",
+        "secondary_foreground": "#FFFFFF",
+        "background": "#FFFFFF",
+        "surface": "#F8F9FA",
+        "surface_highlight": "#F1F5F9",
+        "border": "#E2E8F0",
+        "muted": "#94A3B8",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444"
+      },
+      "usage": {
+        "primary": "Primary Actions (Upload, Save), Active States, Links",
+        "secondary": "Navigation, Sidebar, Footer, High-Contrast Text",
+        "background": "Main Canvas",
+        "surface": "Sidebar, Cards, Dropdowns",
+        "text_main": "Slate-900 (#0F172A)",
+        "text_muted": "Slate-500 (#64748B)"
+      }
+    },
+    "layout": {
+      "spacing": "Generous (2x standard)",
+      "container_padding": "px-4 md:px-8 lg:px-12",
+      "grid_system": {
+        "dashboard": "Bento Grid (grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6)",
+        "gallery": "Masonry Layout (columns-1 md:columns-3 lg:columns-4 gap-6 space-y-6)",
+        "sidebar": "Fixed w-64 hidden md:flex flex-col border-r border-border bg-surface/50 backdrop-blur-xl"
+      },
+      "radius": "rounded-sm (Sharp, Technical Feel)"
+    },
+    "components": {
+      "buttons": "Sharp edges (rounded-sm), uppercase labels, generous padding (px-6 py-2)",
+      "cards": "Flat, 1px border (#E2E8F0), no shadow by default, shadow-lg on hover, white bg",
+      "inputs": "bg-surface_highlight border-transparent focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all rounded-sm",
+      "badges": "rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wider"
+    },
+    "visual_enhancers": {
+      "glassmorphism": "Used for sticky headers and overlays (backdrop-blur-md bg-white/80)",
+      "borders": "Micro-borders (1px solid border-border) to define structure without heavy shadows",
+      "shadows": "Subtle, diffuse ambient shadows for active elements only (shadow-sm)",
+      "textures": "Noise texture overlay at 2% opacity on the main background to reduce digital sterility"
+    },
+    "motion": {
+      "hover": "transform: translateY(-2px) transition-all duration-200 ease-out",
+      "page_transition": "opacity-0 -> opacity-100 duration-300 ease-in-out",
+      "modal_entrance": "scale-95 opacity-0 -> scale-100 opacity-100 duration-200 spring-physics"
+    }
+  },
+  "assets": {
+    "logo_placeholder": "Use text 'Sublima' in Space Grotesk Bold, tracking-tighter",
+    "image_urls": {
+      "gallery_samples": [
+        {
+          "url": "https://images.unsplash.com/photo-1757909986108-eadca79b7920?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwxfHx2aWJyYW50JTIwZmxvcmFsJTIwZ2VvbWV0cmljJTIwYWJzdHJhY3QlMjBzdWJsaW1hdGlvbiUyMHBhdHRlcm4lMjBkZXNpZ258ZW58MHx8fHwxNzcwMzgwMTMxfDA&ixlib=rb-4.1.0&q=85",
+          "category": "Abstract",
+          "alt": "Black and Gold Abstract Pattern"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1746516456261-273d0699aa39?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwzfHx2aWJyYW50JTIwZmxvcmFsJTIwZ2VvbWV0cmljJTIwYWJzdHJhY3QlMjBzdWJsaW1hdGlvbiUyMHBhdHRlcm4lMjBkZXNpZ258ZW58MHx8fHwxNzcwMzgwMTMxfDA&ixlib=rb-4.1.0&q=85",
+          "category": "Geometric",
+          "alt": "Kaleidoscopic Star"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1739477275701-299bf261c0cb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHw0fHx2aWJyYW50JTIwZmxvcmFsJTIwZ2VvbWV0cmljJTIwYWJzdHJhY3QlMjBzdWJsaW1hdGlvbiUyMHBhdHRlcm4lMjBkZXNpZ258ZW58MHx8fHwxNzcwMzgwMTMxfDA&ixlib=rb-4.1.0&q=85",
+          "category": "Vintage",
+          "alt": "Historical Pattern 1"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1739477274920-3a5531a369a4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwyfHx2aWJyYW50JTIwZmxvcmFsJTIwZ2VvbWV0cmljJTIwYWJzdHJhY3QlMjBzdWJsaW1hdGlvbiUyMHBhdHRlcm4lMjBkZXNpZ258ZW58MHx8fHwxNzcwMzgwMTMxfDA&ixlib=rb-4.1.0&q=85",
+          "category": "Vintage",
+          "alt": "Historical Pattern 2"
+        }
+      ],
+      "mockups": [
+        {
+          "url": "https://images.unsplash.com/photo-1622445272011-0f71226e7622?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMHQtc2hpcnQlMjBjb2ZmZWUlMjBtdWclMjBwaG9uZSUyMGNhc2UlMjBtb2NrdXAlMjBibGFua3xlbnwwfHx8fDE3NzAzODAxMzJ8MA&ixlib=rb-4.1.0&q=85",
+          "alt": "Mug Mockup"
+        },
+        {
+          "url": "https://images.pexels.com/photos/6373219/pexels-photo-6373219.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+          "alt": "Phone Case Mockup"
+        }
+      ]
+    }
+  },
+  "implementation_guidelines": {
+    "universal_rules": [
+      "DO NOT use gradients for backgrounds. Keep it flat and clean.",
+      "Use 'Space Grotesk' for all Headings (H1-H3). Use 'Inter' for Body.",
+      "Primary Color #00B4D8 is for ACTIONS only. Do not paint large surfaces with it.",
+      "Sidebar should be collapsible on mobile.",
+      "Gallery images must display aspect ratio correctly (object-contain or masonry).",
+      "Use data-testid attributes for all interactive elements.",
+      "Ensure text contrast ratio is > 4.5:1."
+    ],
+    "shadcn_customization": {
+      "radius": "0.3rem",
+      "border": "1px solid #E2E8F0",
+      "shadow": "none",
+      "hover_effect": "bg-slate-50"
+    },
+    "accessibility": {
+      "focus_ring": "ring-2 ring-primary ring-offset-2",
+      "text_contrast": "Ensure Slate-500 is used on white, Slate-400 on dark."
+    }
+  }
+}
