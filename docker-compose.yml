@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: events-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: events_db
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - events-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: events-backend
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongodb:27017
+      DB_NAME: events_db
+      CORS_ORIGINS: "*"
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mongodb
+    networks:
+      - events-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: http://localhost:8001
+    container_name: events-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - events-network
+
+networks:
+  events-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
