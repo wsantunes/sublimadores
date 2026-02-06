@@ -31,6 +31,8 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     role: str = "viewer"
+    is_active: bool = True
+    access_until: Optional[str] = None
     created_at: datetime
 
 class UserSession(BaseModel):
@@ -98,6 +100,10 @@ class ImageCreate(BaseModel):
 class UpdateUserRole(BaseModel):
     role: str
 
+class UpdateUserAccess(BaseModel):
+    is_active: Optional[bool] = None
+    access_until: Optional[str] = None
+
 async def get_current_user(request: Request) -> User:
     session_token = request.cookies.get("session_token")
     if not session_token:
@@ -124,6 +130,17 @@ async def get_current_user(request: Request) -> User:
     if not user_doc:
         raise HTTPException(status_code=404, detail="User not found")
     
+    if not user_doc.get("is_active", True):
+        raise HTTPException(status_code=403, detail="Account disabled")
+    
+    access_until = user_doc.get("access_until")
+    if access_until:
+        access_date = datetime.fromisoformat(access_until) if isinstance(access_until, str) else access_until
+        if access_date.tzinfo is None:
+            access_date = access_date.replace(tzinfo=timezone.utc)
+        if access_date < datetime.now(timezone.utc):
+            raise HTTPException(status_code=403, detail="Access expired")
+    
     if isinstance(user_doc["created_at"], str):
         user_doc["created_at"] = datetime.fromisoformat(user_doc["created_at"])
     
@@ -149,6 +166,8 @@ async def register(input: RegisterInput):
         "password_hash": hashed.decode('utf-8'),
         "picture": None,
         "role": "viewer",
+        "is_active": True,
+        "access_until": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
@@ -216,6 +235,8 @@ async def process_google_session(request: Request):
             "name": data["name"],
             "picture": data["picture"],
             "role": "viewer",
+            "is_active": True,
+            "access_until": None,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(user_doc)
@@ -252,7 +273,7 @@ async def get_users(user: User = Depends(get_current_user)):
             u["created_at"] = datetime.fromisoformat(u["created_at"])
     return users
 
-@api_router.put("/users/{user_id}")
+@api_router.put("/users/{user_id}/role")
 async def update_user_role(user_id: str, input: UpdateUserRole, user: User = Depends(get_current_user)):
     await require_role(user, ["admin"])
     if input.role not in ["admin", "editor", "viewer"]:
@@ -262,6 +283,31 @@ async def update_user_role(user_id: str, input: UpdateUserRole, user: User = Dep
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "Role updated"}
+
+@api_router.put("/users/{user_id}/access")
+async def update_user_access(user_id: str, input: UpdateUserAccess, user: User = Depends(get_current_user)):
+    await require_role(user, ["admin"])
+    
+    update_data = {}
+    if input.is_active is not None:
+        update_data["is_active"] = input.is_active
+    if input.access_until is not None:
+        if input.access_until == "":
+            update_data["access_until"] = None
+        else:
+            try:
+                datetime.fromisoformat(input.access_until)
+                update_data["access_until"] = input.access_until
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date format")
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.users.update_one({"user_id": user_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "Access updated"}
 
 @api_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, user: User = Depends(get_current_user)):
