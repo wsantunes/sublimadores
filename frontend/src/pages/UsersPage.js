@@ -135,55 +135,145 @@ export default function UsersPage({ user }) {
                   <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Nome</th>
                   <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Email</th>
                   <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Permissão</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Acesso Até</th>
                   <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
-                  <tr key={u.user_id} className="border-b border-border hover:bg-surface/50 transition-colors" data-testid="user-row">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {u.picture ? (
-                          <img src={u.picture} alt={u.name} className="w-10 h-10 rounded-full" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
-                            {u.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <span className="font-medium text-foreground">{u.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">{u.email}</td>
-                    <td className="px-6 py-4">
-                      <Select value={u.role} onValueChange={(value) => handleRoleChange(u.user_id, value)} disabled={u.user_id === user.user_id}>
-                        <SelectTrigger className="w-32 rounded-sm bg-surface-highlight border-transparent" data-testid="role-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                          <SelectItem value="viewer">Visualizador</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="px-6 py-4">
-                      {u.user_id !== user.user_id && (
+                {users.map((u) => {
+                  const isExpired = u.access_until && new Date(u.access_until) < new Date();
+                  return (
+                    <tr key={u.user_id} className="border-b border-border hover:bg-surface/50 transition-colors" data-testid="user-row">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          {u.picture ? (
+                            <img src={u.picture} alt={u.name} className="w-10 h-10 rounded-full" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                              {u.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="font-medium text-foreground">{u.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground">{u.email}</td>
+                      <td className="px-6 py-4">
+                        <Select value={u.role} onValueChange={(value) => handleRoleChange(u.user_id, value)} disabled={u.user_id === user.user_id}>
+                          <SelectTrigger className="w-32 rounded-sm bg-surface-highlight border-transparent" data-testid="role-select">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="editor">Editor</SelectItem>
+                            <SelectItem value="viewer">Visualizador</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={u.is_active !== false}
+                            onCheckedChange={() => handleToggleActive(u.user_id, u.is_active !== false)}
+                            disabled={u.user_id === user.user_id}
+                            data-testid="active-switch"
+                          />
+                          <span className={`text-xs font-medium uppercase tracking-wider ${u.is_active !== false ? 'text-success' : 'text-muted-foreground'}`}>
+                            {u.is_active !== false ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
                         <Button
-                          onClick={() => handleDelete(u.user_id)}
+                          onClick={() => handleOpenAccessDialog(u)}
                           size="sm"
-                          variant="destructive"
-                          className="rounded-sm"
-                          data-testid="delete-user-button"
+                          variant="outline"
+                          className="rounded-sm text-xs"
+                          disabled={u.user_id === user.user_id}
+                          data-testid="access-date-button"
                         >
-                          <Trash2 size={14} />
+                          <Calendar size={14} className="mr-1" />
+                          {u.access_until ? (
+                            <span className={isExpired ? 'text-error' : ''}>
+                              {new Date(u.access_until).toLocaleDateString('pt-BR')}
+                            </span>
+                          ) : (
+                            'Ilimitado'
+                          )}
                         </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        {u.user_id !== user.user_id && (
+                          <Button
+                            onClick={() => handleDelete(u.user_id)}
+                            size="sm"
+                            variant="destructive"
+                            className="rounded-sm"
+                            data-testid="delete-user-button"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
+          
+          <Dialog open={isAccessDialogOpen} onOpenChange={setIsAccessDialogOpen}>
+            <DialogContent className="rounded-sm">
+              <DialogHeader>
+                <DialogTitle className="font-heading flex items-center gap-2">
+                  <Shield className="text-primary" size={20} />
+                  Controle de Acesso
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">
+                    Usuário: {selectedUser?.name}
+                  </Label>
+                  <p className="text-sm text-muted-foreground mb-4">{selectedUser?.email}</p>
+                </div>
+                
+                <div>
+                  <Label htmlFor="access-until" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
+                    Acesso Permitido Até
+                  </Label>
+                  <Input
+                    id="access-until"
+                    type="date"
+                    value={accessUntil}
+                    onChange={(e) => setAccessUntil(e.target.value)}
+                    className="mt-1 rounded-sm bg-surface-highlight border-transparent focus:border-primary"
+                    data-testid="access-until-input"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Deixe vazio para acesso ilimitado
+                  </p>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleUpdateAccessUntil}
+                    className="flex-1 rounded-sm bg-primary text-white hover:bg-primary/90"
+                    data-testid="save-access-button"
+                  >
+                    Salvar
+                  </Button>
+                  <Button
+                    onClick={() => setIsAccessDialogOpen(false)}
+                    variant="outline"
+                    className="flex-1 rounded-sm"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
