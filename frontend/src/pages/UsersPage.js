@@ -43,13 +43,48 @@ export default function UsersPage({ user }) {
   const handleRoleChange = async (userId, newRole) => {
     try {
       const token = localStorage.getItem('session_token');
-      await axios.put(`${BACKEND_URL}/api/users/${userId}`, { role: newRole }, {
+      await axios.put(`${BACKEND_URL}/api/users/${userId}/role`, { role: newRole }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Permissão atualizada com sucesso');
       fetchUsers();
     } catch (error) {
       toast.error('Erro ao atualizar permissão');
+    }
+  };
+  
+  const handleToggleActive = async (userId, currentStatus) => {
+    try {
+      const token = localStorage.getItem('session_token');
+      await axios.put(`${BACKEND_URL}/api/users/${userId}/access`, 
+        { is_active: !currentStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Usuário ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`);
+      fetchUsers();
+    } catch (error) {
+      toast.error('Erro ao atualizar status');
+    }
+  };
+  
+  const handleOpenAccessDialog = (u) => {
+    setSelectedUser(u);
+    setAccessUntil(u.access_until || '');
+    setIsAccessDialogOpen(true);
+  };
+  
+  const handleUpdateAccessUntil = async () => {
+    try {
+      const token = localStorage.getItem('session_token');
+      await axios.put(`${BACKEND_URL}/api/users/${selectedUser.user_id}/access`, 
+        { access_until: accessUntil || '' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Data de acesso atualizada com sucesso');
+      setIsAccessDialogOpen(false);
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao atualizar data de acesso');
     }
   };
   
