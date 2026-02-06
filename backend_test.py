@@ -3,7 +3,7 @@ import json
 import sys
 from datetime import datetime
 
-BACKEND_URL = "https://print-gallery-admin.preview.emergentagent.com"
+BACKEND_URL = "https://events-hub-5.preview.emergentagent.com"
 
 class APITester:
     def __init__(self):

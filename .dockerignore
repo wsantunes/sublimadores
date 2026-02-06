@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+
+# Test files
+test_reports/
+tests/
+*.test.js
+*.spec.js
+__pycache__/
+*.pyc
+
+# Environment files (use docker-compose environment instead)
+.env.local
+.env.development
+.env.test
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+frontend/build/
+
+# Misc
+.DS_Store
+*.log
