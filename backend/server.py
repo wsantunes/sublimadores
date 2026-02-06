@@ -235,6 +235,8 @@ async def process_google_session(request: Request):
             "name": data["name"],
             "picture": data["picture"],
             "role": "viewer",
+            "is_active": True,
+            "access_until": None,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(user_doc)
