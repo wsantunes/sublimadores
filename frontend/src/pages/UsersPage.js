@@ -16,6 +16,9 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export default function UsersPage({ user }) {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isAccessDialogOpen, setIsAccessDialogOpen] = useState(false);
+  const [accessUntil, setAccessUntil] = useState('');
   
   useEffect(() => {
     if (user?.role !== 'admin') {
