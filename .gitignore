@@ -89,6 +89,7 @@ android-sdk/ -e
 # Environment files
 *.env
 *.env.*
+<<<<<<< HEAD
 -e 
 # Environment files
 *.env
@@ -97,3 +98,5 @@ android-sdk/ -e
 # Environment files
 *.env
 *.env.*
+=======
+>>>>>>> 949c7dbdad7c2599094afbb1856f37d2e169a0dd
