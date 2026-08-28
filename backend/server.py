@@ -1,5 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, UploadFile, File
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -11,8 +10,6 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
-import httpx
-import base64
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -203,55 +200,6 @@ async def login(input: LoginInput):
     await db.user_sessions.insert_one(session_doc)
     
     return {"session_token": session_token, "user": {"user_id": user_doc["user_id"], "email": user_doc["email"], "name": user_doc["name"], "role": user_doc["role"]}}
-
-@api_router.get("/auth/session")
-async def process_google_session(request: Request):
-    session_id = request.headers.get("X-Session-ID")
-    if not session_id:
-        raise HTTPException(status_code=400, detail="Missing session_id")
-    
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": session_id}
-        )
-        if response.status_code != 200:
-            raise HTTPException(status_code=400, detail="Invalid session_id")
-        
-        data = response.json()
-    
-    existing_user = await db.users.find_one({"email": data["email"]}, {"_id": 0})
-    if existing_user:
-        user_id = existing_user["user_id"]
-        await db.users.update_one(
-            {"user_id": user_id},
-            {"$set": {"name": data["name"], "picture": data["picture"]}}
-        )
-    else:
-        user_id = f"user_{uuid.uuid4().hex[:12]}"
-        user_doc = {
-            "user_id": user_id,
-            "email": data["email"],
-            "name": data["name"],
-            "picture": data["picture"],
-            "role": "viewer",
-            "is_active": True,
-            "access_until": None,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.users.insert_one(user_doc)
-    
-    session_token = data["session_token"]
-    session_doc = {
-        "user_id": user_id,
-        "session_token": session_token,
-        "expires_at": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.user_sessions.insert_one(session_doc)
-    
-    user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
-    return {"session_token": session_token, "user": user}
 
 @api_router.get("/auth/me")
 async def get_me(user: User = Depends(get_current_user)):

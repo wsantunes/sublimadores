@@ -26,7 +26,6 @@ O usuário deseja construir uma aplicação full-stack de gerenciamento de event
 - FastAPI server with full REST API
 - MongoDB integration with Motor async driver
 - Authentication system (register, login, logout, session management)
-- Google OAuth 2.0 integration via Emergent
 - CRUD APIs for:
   - Users (`/api/users`)
   - Categories (`/api/categories`)
@@ -183,5 +182,4 @@ O usuário deseja construir uma aplicação full-stack de gerenciamento de event
 
 ## Notes
 - All sensitive credentials are managed via environment variables
-- Google OAuth uses Emergent's managed authentication service
 - MongoDB is used instead of SQLite (differs from original handoff summary)

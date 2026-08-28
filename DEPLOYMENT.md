@@ -1,112 +1,99 @@
-# Events Hub - Deployment Guide
+# Sublima - Guia de Deployment
 
-## 🐳 Docker Deployment
+## Requisitos
 
-This application can be deployed using Docker and Docker Compose.
+- Docker Desktop com Docker Compose
+- Git
 
-### Prerequisites
+## Execução local
 
-- Docker Engine 20.10+
-- Docker Compose 2.0+
-
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd events-hub
-   ```
-
-2. **Start all services**
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8001/api
-
-### Services
-
-| Service   | Port | Description              |
-|-----------|------|--------------------------|
-| Frontend  | 3000 | React application (nginx)|
-| Backend   | 8001 | FastAPI REST API         |
-| MongoDB   | 27017| Database                 |
-
-### Environment Variables
-
-#### Backend
-| Variable      | Default                    | Description          |
-|--------------|----------------------------|----------------------|
-| MONGO_URL    | mongodb://mongodb:27017    | MongoDB connection   |
-| DB_NAME      | events_db                  | Database name        |
-| CORS_ORIGINS | *                          | Allowed CORS origins |
-
-#### Frontend
-| Variable               | Description       |
-|-----------------------|-------------------|
-| REACT_APP_BACKEND_URL | Backend API URL   |
-
-### Commands
-
-```bash
-# Start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-
-# Rebuild and restart
-docker-compose up -d --build
-
-# Remove volumes (CAUTION: deletes database)
-docker-compose down -v
+```powershell
+git clone https://github.com/wsantunes/sublimadores.git
+cd sublimadores
+docker compose up -d --build
 ```
 
-### Production Deployment
+Serviços publicados:
 
-For production, update the following:
+| Serviço | Porta | Endereço |
+| --- | ---: | --- |
+| Frontend | 3000 | http://localhost:3000 |
+| API | 8001 | http://localhost:8001/docs |
+| MongoDB | 27017 | mongodb://localhost:27017 |
 
-1. **docker-compose.yml**: Set proper `REACT_APP_BACKEND_URL` to your domain
-2. **nginx.conf**: Update `proxy_pass` if using different backend URL
-3. **Security**: Add MongoDB authentication and proper CORS configuration
+## Comandos úteis
 
-### Building Individual Images
+```powershell
+# Iniciar sem reconstruir
+docker compose up -d
 
-```bash
-# Backend
-cd backend
-docker build -t events-backend .
+# Reconstruir e reiniciar
+docker compose up -d --build
 
-# Frontend
-cd frontend
-docker build -t events-frontend --build-arg REACT_APP_BACKEND_URL=https://api.yourdomain.com .
+# Ver logs
+docker compose logs -f
+
+# Ver status
+docker compose ps
+
+# Parar os serviços
+docker compose down
+
+# Parar e apagar os dados do banco
+docker compose down -v
 ```
 
-## 🔧 Development Setup
+## Variáveis de ambiente
 
-### Without Docker
+O Compose define os valores locais:
 
-**Backend:**
-```bash
+| Variável | Valor local | Uso |
+| --- | --- | --- |
+| `MONGO_URL` | `mongodb://mongodb:27017` | Conexão do backend |
+| `DB_NAME` | `events_db` | Banco usado pela aplicação |
+| `CORS_ORIGINS` | `*` | Origens permitidas no desenvolvimento |
+| `REACT_APP_BACKEND_URL` | vazio no frontend Docker | O frontend usa o proxy `/api` |
+
+## Recursos do MVP
+
+- Autenticação local com perfis `admin`, `editor` e `viewer`.
+- Upload individual de imagens de até 5 MB.
+- Importação de diretórios: pastas viram categorias e subpastas preservam o caminho.
+- Download da imagem original pela galeria.
+
+O seletor de diretórios requer Edge, Chrome ou Firefox. Internet Explorer não é suportado.
+
+## Desenvolvimento sem Docker
+
+Requer Python 3.11+, Node.js 20+, Yarn 1.22+ e MongoDB local.
+
+Backend:
+
+```powershell
 cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+$env:MONGO_URL="mongodb://localhost:27017"
+$env:DB_NAME="events_db"
+$env:CORS_ORIGINS="http://localhost:3000"
 uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 ```
 
-**Frontend:**
-```bash
+Frontend, em outro terminal:
+
+```powershell
 cd frontend
-yarn install
-yarn start
+corepack yarn install
+corepack yarn start
 ```
 
-### API Documentation
+## Produção
 
-Once running, access the API docs at:
-- Swagger UI: http://localhost:8001/docs
-- ReDoc: http://localhost:8001/redoc
+Antes de publicar:
+
+1. Configure autenticação do MongoDB.
+2. Restrinja `CORS_ORIGINS` aos domínios oficiais.
+3. Configure HTTPS e um proxy reverso.
+4. Troque as credenciais administrativas locais.
+5. Defina `REACT_APP_BACKEND_URL` durante o build caso a API esteja em outro domínio.

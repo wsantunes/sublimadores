@@ -6,7 +6,7 @@ import FilterBar from '@/components/FilterBar';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 export default function Dashboard({ user }) {
   const navigate = useNavigate();

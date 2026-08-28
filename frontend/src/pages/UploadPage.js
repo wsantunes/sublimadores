@@ -5,17 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Plus, ArrowLeft, FolderUp } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 export default function UploadPage({ user }) {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [importProgress, setImportProgress] = useState(null);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -61,6 +62,78 @@ export default function UploadPage({ user }) {
       setFormData({ ...formData, image_data: reader.result });
     };
     reader.readAsDataURL(file);
+  };
+
+  const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const handleDirectoryImport = async (e) => {
+    const files = Array.from(e.target.files || []).filter((file) => file.type.startsWith('image/'));
+    e.target.value = '';
+
+    if (files.length === 0) {
+      toast.error('Nenhuma imagem encontrada na pasta');
+      return;
+    }
+
+    const oversizedFile = files.find((file) => file.size > 5 * 1024 * 1024);
+    if (oversizedFile) {
+      toast.error(`A imagem ${oversizedFile.name} excede o limite de 5MB`);
+      return;
+    }
+
+    setIsLoading(true);
+    setImportProgress({ current: 0, total: files.length });
+
+    try {
+      const token = localStorage.getItem('session_token');
+      const headers = { Authorization: `Bearer ${token}` };
+      const categoryMap = new Map(categories.map((category) => [category.name.toLowerCase(), category.category_id]));
+      let imported = 0;
+
+      for (const file of files) {
+        const pathParts = (file.webkitRelativePath || file.name).split('/');
+        const categoryName = pathParts.length > 2 ? pathParts.slice(1, -1).join(' / ') : '';
+        let categoryId = null;
+
+        if (categoryName) {
+          const categoryKey = categoryName.toLowerCase();
+          categoryId = categoryMap.get(categoryKey);
+          if (!categoryId) {
+            const categoryResponse = await axios.post(`${BACKEND_URL}/api/categories`, {
+              name: categoryName,
+              description: 'Criada durante importação de diretório'
+            }, { headers });
+            categoryId = categoryResponse.data.category_id;
+            categoryMap.set(categoryKey, categoryId);
+          }
+        }
+
+        await axios.post(`${BACKEND_URL}/api/images`, {
+          title: file.name.replace(/\.[^/.]+$/, ''),
+          description: categoryName ? `Importada de ${categoryName}` : null,
+          tags: [],
+          category_id: categoryId,
+          event_id: null,
+          image_data: await readFileAsDataUrl(file)
+        }, { headers });
+
+        imported += 1;
+        setImportProgress({ current: imported, total: files.length });
+      }
+
+      toast.success(`${imported} imagem(ns) importada(s) com sucesso`);
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao importar diretório');
+    } finally {
+      setIsLoading(false);
+      setImportProgress(null);
+    }
   };
   
   const handleSubmit = async (e) => {
@@ -131,6 +204,32 @@ export default function UploadPage({ user }) {
         
         <div className="px-4 md:px-8 lg:px-12 py-8">
           <div className="max-w-2xl bg-white border border-border rounded-sm p-6">
+            <div className="mb-8 border-b border-border pb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <FolderUp size={20} className="text-primary" />
+                <h2 className="font-heading font-semibold text-lg">Importar diretório</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Cada pasta será criada como uma categoria e as imagens serão importadas automaticamente.
+              </p>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                webkitdirectory=""
+                directory=""
+                onChange={handleDirectoryImport}
+                disabled={isLoading}
+                className="rounded-sm"
+                data-testid="directory-input"
+              />
+              {importProgress && (
+                <p className="text-sm text-muted-foreground mt-3">
+                  Importando {importProgress.current} de {importProgress.total} imagens...
+                </p>
+              )}
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="image" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Imagem</Label>

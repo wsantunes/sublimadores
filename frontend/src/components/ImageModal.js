@@ -1,7 +1,19 @@
-import { X } from 'lucide-react';
+import { Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function ImageModal({ image, onClose }) {
+  const handleDownload = () => {
+    const mimeType = image.image_data.match(/^data:([^;]+);/)?.[1] || 'image/png';
+    const extension = mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'png';
+    const fileName = image.title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 _-]/gi, '').trim() || 'imagem';
+    const link = document.createElement('a');
+    link.href = image.image_data;
+    link.download = `${fileName}.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
@@ -28,6 +40,15 @@ export default function ImageModal({ image, onClose }) {
           
           <div className="w-full md:w-80 space-y-4">
             <h2 className="text-2xl font-heading font-bold text-foreground">{image.title}</h2>
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+              className="w-full rounded-sm"
+              data-testid="download-image-button"
+            >
+              <Download size={18} />
+              Baixar imagem original
+            </Button>
             {image.description && (
               <p className="text-base text-muted-foreground leading-relaxed">{image.description}</p>
             )}
