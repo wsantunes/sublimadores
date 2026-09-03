@@ -52,7 +52,7 @@ Essa conta é apenas para desenvolvimento. Troque ou remova a conta antes de qua
 - CRUD de categorias e eventos
 - Galeria com filtros por texto, categoria e evento
 - Upload individual de imagens de até 5 MB
-- Importação de diretório: cada pasta vira uma categoria e subpastas preservam o caminho
+- Importação de diretório: a pasta selecionada (ou cada subpasta) vira uma categoria, ou opcionalmente uma categoria única fixada para todo o lote
 - Download da imagem original, sem redimensionamento
 - MongoDB persistido no volume `sublimadores_mongodb_data`
 
@@ -61,7 +61,9 @@ Essa conta é apenas para desenvolvimento. Troque ou remova a conta antes de qua
 Na página `Upload`, selecione uma pasta no campo **Importar diretório**. O sistema:
 
 1. Localiza os arquivos de imagem dentro da pasta e subpastas.
-2. Cria as categorias que ainda não existem.
+2. Define a categoria de cada imagem:
+   - Se o campo **Categoria do lote** estiver preenchido, todas as imagens do lote entram nessa categoria.
+   - Caso contrário, usa o nome da subpasta da imagem (ou o nome da própria pasta selecionada, quando não há subpastas) como categoria, criando-a se ainda não existir.
 3. Usa o nome do arquivo como título.
 4. Envia as imagens sequencialmente e mostra o progresso.
 

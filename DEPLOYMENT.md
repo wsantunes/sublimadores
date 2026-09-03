@@ -58,7 +58,7 @@ O Compose define os valores locais:
 
 - Autenticação local com perfis `admin`, `editor` e `viewer`.
 - Upload individual de imagens de até 5 MB.
-- Importação de diretórios: pastas viram categorias e subpastas preservam o caminho.
+- Importação de diretórios: pastas (e subpastas) viram categorias automaticamente, ou uma categoria única pode ser fixada para todo o lote.
 - Download da imagem original pela galeria.
 
 O seletor de diretórios requer Edge, Chrome ou Firefox. Internet Explorer não é suportado.
