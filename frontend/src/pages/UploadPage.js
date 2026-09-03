@@ -17,7 +17,8 @@ export default function UploadPage({ user }) {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [importProgress, setImportProgress] = useState(null);
-  
+  const [batchCategoryId, setBatchCategoryId] = useState('');
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -96,20 +97,33 @@ export default function UploadPage({ user }) {
       let imported = 0;
 
       for (const file of files) {
-        const pathParts = (file.webkitRelativePath || file.name).split('/');
-        const categoryName = pathParts.length > 2 ? pathParts.slice(1, -1).join(' / ') : '';
-        let categoryId = null;
+        let categoryId = batchCategoryId || null;
+        let categoryName = batchCategoryId
+          ? categories.find((category) => category.category_id === batchCategoryId)?.name || ''
+          : '';
 
-        if (categoryName) {
-          const categoryKey = categoryName.toLowerCase();
-          categoryId = categoryMap.get(categoryKey);
-          if (!categoryId) {
-            const categoryResponse = await axios.post(`${BACKEND_URL}/api/categories`, {
-              name: categoryName,
-              description: 'Criada durante importação de diretório'
-            }, { headers });
-            categoryId = categoryResponse.data.category_id;
-            categoryMap.set(categoryKey, categoryId);
+        if (!categoryId) {
+          // Sem categoria fixada: usa a estrutura de pastas selecionada.
+          // webkitRelativePath = "<pastaRaiz>/arquivo.jpg" (sem subpasta) ou
+          // "<pastaRaiz>/<subpasta.../>arquivo.jpg" (com subpastas).
+          const pathParts = (file.webkitRelativePath || file.name).split('/');
+          if (pathParts.length > 2) {
+            categoryName = pathParts.slice(1, -1).join(' / ');
+          } else if (pathParts.length === 2) {
+            categoryName = pathParts[0];
+          }
+
+          if (categoryName) {
+            const categoryKey = categoryName.toLowerCase();
+            categoryId = categoryMap.get(categoryKey);
+            if (!categoryId) {
+              const categoryResponse = await axios.post(`${BACKEND_URL}/api/categories`, {
+                name: categoryName,
+                description: 'Criada durante importação de diretório'
+              }, { headers });
+              categoryId = categoryResponse.data.category_id;
+              categoryMap.set(categoryKey, categoryId);
+            }
           }
         }
 
@@ -210,8 +224,29 @@ export default function UploadPage({ user }) {
                 <h2 className="font-heading font-semibold text-lg">Importar diretório</h2>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Cada pasta será criada como uma categoria e as imagens serão importadas automaticamente.
+                Por padrão, cada pasta (ou subpasta) vira uma categoria com o mesmo nome.
+                Se preferir, escolha abaixo uma categoria fixa para todo o lote.
               </p>
+              <div className="mb-4">
+                <Label htmlFor="batch-category" className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
+                  Categoria do lote (opcional)
+                </Label>
+                <select
+                  id="batch-category"
+                  value={batchCategoryId}
+                  onChange={(e) => setBatchCategoryId(e.target.value)}
+                  className="mt-1 w-full rounded-sm bg-surface-highlight border border-transparent focus:border-primary px-3 py-2 text-sm"
+                  disabled={isLoading}
+                  data-testid="batch-category-select"
+                >
+                  <option value="">Detectar automaticamente pelo nome da pasta</option>
+                  {categories.map((cat) => (
+                    <option key={cat.category_id} value={cat.category_id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <Input
                 type="file"
                 accept="image/*"
